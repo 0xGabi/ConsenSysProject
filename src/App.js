@@ -7,9 +7,6 @@ import './css/open-sans.css'
 import './css/pure-min.css'
 import './App.css'
 
-//import {AdminComponent} from './components/AdminComponent.js'
-//import {StoreOwnerComponent} from './components/StoreOwnerComponent.js'
-
 class App extends Component {
   constructor(props) {
     super(props)
@@ -22,7 +19,7 @@ class App extends Component {
 
     this.handleChange = this.handleChange.bind(this);
     //this.handleAddStore = this.handleCreateStore.bind(this);
-    //this.handleAddStoreOwner = this.handleAddStoreOwner.bind(this);
+    this.handleAddStoreOwner = this.handleAddStoreOwner.bind(this);
   }
 
   componentWillMount() {
@@ -67,7 +64,7 @@ class App extends Component {
         return marketPlaceInstance.getUserRole.call({from: _accounts[0]});
       }).then((result) => {
 
-        return this.setState({ userRole: this.state.web3.toUtf8(result)} );
+        return this.setState({ userRole: result} );
       })
     })
   }
@@ -78,31 +75,43 @@ class App extends Component {
 
   /*handleCreateStore(storeName) {
     this.state.storeFactoryContract.createStore(storeName, { from: theCoinbase })
-  }
+  }*/
 
   handleAddStoreOwner(address) {
-    this.state.storeFactoryContract.addStoreOwner(address, { from: this.state.accounts[0] })
-  }*/
+    this.state.marketPlaceContrac.addStoreOwner(address, { from: this.state.accounts[0] })
+  }
 
   render() {
     const role = this.state.userRole;
     let component;
 
     if(role === 0) {
-        //component = <AdminComponent/>
+        component =
+          <main className="container">
+            <div className="pure-g">
+              <div className="pure-u-1-1">
+                <h1>Welcome to the MarketPlace Admin!</h1>
+                <p>The user role is: {this.state.userRole}</p>
+              </div>
+            </div>
+          </main>
     } else if(role === 1) {
-        //component = <StoreOwnerComponent/>
+        component =
+        <main className="container">
+          <div className="pure-g">
+            <div className="pure-u-1-1">
+              <h1>Welcome to the MarketPlace Store Owner!</h1>
+              <p>The user role is: {this.state.userRole}</p>
+            </div>
+          </div>
+        </main>
     } else if(role === 2) {
         component =
         <main className="container">
           <div className="pure-g">
             <div className="pure-u-1-1">
               <h1>Welcome to the MarketPlace Shopper!</h1>
-
-              <h2>Smart Contract Example</h2>
-              <p>If your contracts compiled and migrated successfully, below will show a stored value of 5 (by default).</p>
-              <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
-              <p>The stored value is: {this.state.userRole}</p>
+              <p>The user role is: {this.state.userRole}</p>
             </div>
           </div>
         </main>

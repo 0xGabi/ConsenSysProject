@@ -125,13 +125,6 @@ contract Store is Pausable, Escrow {
     }
 
     /**
-    * @dev Transfers the current balance to the storeOwner and terminates the contract.
-    */
-    function destroy() public onlyStoreOwner {
-        selfdestruct(storeOwner);
-    }
-
-    /**
     * @notice Get product
     * @param id Identification of the prodcut
     */
