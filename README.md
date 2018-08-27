@@ -11,9 +11,13 @@ The central marketplace is managed by a group of administrators. Admins allow st
 
 It satisfies the following:  
 A. Identification.  
+
 B. Market Place functionality for admins, owners y shoppers.
+
 C. Allow admins to add new owners.
+
 D. Allow owners to create stores and manage products.
+
 E. Allow shoppers to view stores and buy products.  
 
 
