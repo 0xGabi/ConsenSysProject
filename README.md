@@ -9,17 +9,13 @@ The central marketplace is managed by a group of administrators. Admins allow st
 
 ## What it does
 
-It satisfies the following: 
+Satisfies the following: 
 
-A. Identification.  
-
-B. Market Place functionality for admins, owners y shoppers.
-
-C. Allow admins to add new owners.
-
-D. Allow owners to create stores and manage products.
-
-E. Allow shoppers to view stores and buy products.  
+1. Identification.  
+2. Market Place functionality for admins, owners y shoppers.
+3. Allow admins to add new owners.
+4. Allow owners to create stores and manage products.
+5. Allow shoppers to view stores and buy products.  
 
 
 ### Contracts on the project: 
@@ -65,10 +61,10 @@ ganache-cli --port 8545 --mnemonic "hild relax seven grocery thumb glove age bod
 3. Set Up MetaMask for project -
     import with seed phrase "hild relax seven grocery thumb glove age body tube width grief clap"
     1. change the network to Private Network, set port to: 8545
-    2. This will set account[0] for you. 
+    2. This will set account[0]. 
 
 4. Compile truffle
-Compile the project in standard manner from the directory where the files are located.
+Compile the project from the directory where the files are located.
 
 ```
 truffle compile
@@ -81,7 +77,7 @@ truffle migrate
 ```
 
 6. Tests
-A series of solidity tests for the contract files, testing basic contract functionality.
+A series of javascript tests for the contract files, testing basic contract functionality.
 
 ```
 truffle test
