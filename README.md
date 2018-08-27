@@ -9,7 +9,8 @@ The central marketplace is managed by a group of administrators. Admins allow st
 
 ## What it does
 
-It satisfies the following:  
+It satisfies the following: 
+
 A. Identification.  
 
 B. Market Place functionality for admins, owners y shoppers.
