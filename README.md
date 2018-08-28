@@ -9,7 +9,7 @@ The central marketplace is managed by a group of administrators. Admins allow st
 
 ## What it does
 
-Satisfies the following: 
+### Satisfies the following: 
 
 1. Identification.  
 2. Market Place functionality for admins, owners y shoppers.
@@ -22,7 +22,7 @@ Satisfies the following:
 
 1. MarketPlace.sol - Provide Market Place funcionality.
 2. Store.sol - Store functionality.
-3. Escrow.sol - Manage the payments on the store as a deposit for the store owner.
+3. Ownable.sol - Manage the onwership patter and onlyOwner modifier.
 4. Pausable.sol - Allowing an emergency stop pattern.
 5. SafeMath.sol - Library, allowing cover of overflows in store.
 
@@ -35,23 +35,23 @@ These prerequisites and repository files should allow a copy of the project up a
 
 1. Node package manager - https://www.npmjs.com/get-npm 
 
-npm should be installed properly on your machine.   See the above link for how to do this.
+    npm should be installed properly on your machine. See the above link for how to do this.
 
 2. Truffle install - https://github.com/trufflesuite/truffle
 
-Truffle should be installed properly on your machine.   See the above link for how to do this.
+    Truffle should be installed properly on your machine. See the above link for how to do this.
 
 3. ganache-cli install - https://github.com/trufflesuite/ganache-cli
 
-Ganache-cli should be installed properly on your machine.  See the above link for how to do this.  The GUI Ganache can also be used.
+    Ganache-cli should be installed properly on your machine. See the above link for how to do this. The GUI Ganache can also be used.
 
 4. Project files (this git collection) in a local directory.
 
-Unzip/Clone the Repository to a local directory
+    Unzip/Clone the Repository to a local directory
 
 5. MetaMask install - https://metamask.io/
 
-Install MetaMask. See above link for how to do this.
+    Install MetaMask. See above link for how to do this.
 
 ### Installing
 

@@ -1,15 +1,15 @@
 pragma solidity ^0.4.21;
 
 import "./openzeppelin-solidity/Pausable.sol";
+import "./openzeppelin-solidity/Ownable.sol";
 import "./openzeppelin-solidity/SafeMath.sol";
 
 /** @title Store */
-contract Store is Pausable {
+contract Store is Ownable, Pausable {
     using SafeMath for uint256; 
 
     ///State
 
-    address public storeOwner;
     string public storeName;
     uint256 public storeBalance;
 
@@ -28,20 +28,10 @@ contract Store is Pausable {
     event ProductRemoved(uint256 id, uint256 stock);
     
     event StockUpdated(uint256 id, uint256 stock);
-    event StockAvaiable(uint256 id, uint256 quantity);
+    event StockAvaiable(bool available);
     
     event Purchase(uint256 id, uint256 stock);
-    event Withdraw(uint256 payment);
-
-    ///Modifier
-
-    /**
-    * @dev Throws if called by any account other than owner.
-    */
-    modifier onlyStoreOwner {
-        require(msg.sender == storeOwner);
-        _;
-    }
+    event WithdrawCorrectly(uint256 balance);
 
     ///Functions
 
@@ -51,7 +41,7 @@ contract Store is Pausable {
     * @param _storeName Name of the store
     */
     constructor(address _storeOwner, string _storeName) public {
-        storeOwner = _storeOwner;
+        owner = _storeOwner;
         storeName = _storeName;
     }
     
@@ -62,7 +52,7 @@ contract Store is Pausable {
     * @param price Price of the new product
     * @param stock Stock of the new product
     */
-    function addProduct(uint256 id, string name, uint256 price, uint256 stock) public onlyStoreOwner whenNotPaused returns (bool success) {
+    function addProduct(uint256 id, string name, uint256 price, uint256 stock) public onlyOwner whenNotPaused returns (bool success) {
         Product memory newProduct = Product(id, name, price, stock);
         bytes memory temp = bytes(newProduct.name);
         if (newProduct.price > 0 && temp.length != 0) {
@@ -78,7 +68,7 @@ contract Store is Pausable {
     * @param id Identification of the prodcut
     * @param amount Amount of stock to add
     */
-    function addStock(uint256 id, uint256 amount) public onlyStoreOwner whenNotPaused returns (bool success) {
+    function addStock(uint256 id, uint256 amount) public onlyOwner whenNotPaused returns (bool success) {
         products[id].stock = products[id].stock.add(amount);
         emit StockUpdated(id, products[id].stock);
         return true;
@@ -89,11 +79,12 @@ contract Store is Pausable {
     * @param id Identification of the prodcut
     * @param needed Stock needed
     */
-    function checkStock(uint256 id, uint256 needed) public onlyStoreOwner whenNotPaused returns(bool available) {
+    function checkStock(uint256 id, uint256 needed) public onlyOwner whenNotPaused returns(bool available) {
         if (products[id].stock >= needed) {
-            emit StockAvaiable(id, needed);
+            emit StockAvaiable(true);
             return true;
         }
+        emit StockAvaiable(false);
         return false;
     }
 
@@ -102,7 +93,7 @@ contract Store is Pausable {
     * @param id Identification of the prodcut
     * @param amount Amount of stock to remove
     */
-    function removeStock(uint256 id, uint256 amount) public onlyStoreOwner whenNotPaused returns (bool success){
+    function removeStock(uint256 id, uint256 amount) public onlyOwner whenNotPaused returns (bool success){
         products[id].stock = products[id].stock.sub(amount);
         emit ProductRemoved(id, products[id].stock);
         return true;
@@ -127,12 +118,11 @@ contract Store is Pausable {
     /**
     * @dev Withdraw store balance
     */
-    function withdraw() public onlyStoreOwner {
-        uint256 payment = storeBalance;
-        assert(address(this).balance >= storeBalance);
-        storeBalance = 0;
-        storeOwner.transfer(payment);
-        emit Withdraw(payment);
+    function withdraw(uint256 amount) public onlyOwner {
+        assert(storeBalance >= amount);
+        storeBalance = storeBalance.sub(amount);
+        owner.transfer(amount);
+        emit WithdrawCorrectly(amount);
     }
 
 
