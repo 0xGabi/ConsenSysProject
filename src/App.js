@@ -73,6 +73,27 @@ class App extends Component {
     this.setState({ inputText: e.target.value });
   }
 
+  handleCreateStore() {
+    this.state.storeFactoryInstance.createStore(this.state.inputText, { from: this.state.account }).then((result) => {
+      for (var i= 0; i< result.logs.length; i++) {
+        var log = result.logs[i]
+        console.log(log)
+        if (log.event === "LogStoreCreated") {
+          const storeAddress = log.args.store
+
+          this.instantiateStoreContract(storeAddress)
+        }
+      }
+    })
+  }
+
+  instantiateStoreContract(address) {
+    const storeInstance = this.state.storeContract.at(address)
+    let storesArray = this.state.storeInstances.concat( storeInstance )
+    this.setState({ storeInstances: storesArray })
+    this.getStoreName( storeInstance )
+  }
+
   /*handleCreateStore(storeName) {
     this.state.storeFactoryContract.createStore(storeName, { from: theCoinbase })
   }*/

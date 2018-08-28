@@ -1,92 +1,71 @@
-/*const MetaCoin = artifacts.require("MetaCoin");
+var Store = artifacts.require("./Store.sol");
 
-contract('2nd MetaCoin test', async (accounts) => {
+contract("Store", function(accounts) {
 
-  it("should put 10000 MetaCoin in the first account", async () => {
-     let instance = await MetaCoin.deployed();
-     let balance = await instance.getBalance.call(accounts[0]);
-     assert.equal(balance.valueOf(), 10000);
+  const owner = accounts[0]
+  const storeName = "testStore"
+  let instance = null;
+
+  before("setup contract for test", async() => {
+    instance = await Store.new(owner, storeName);
   })
 
-  it("should call a function that depends on a linked library", async () => {
-    let meta = await MetaCoin.deployed();
-    let outCoinBalance = await meta.getBalance.call(accounts[0]);
-    let metaCoinBalance = outCoinBalance.toNumber();
-    let outCoinBalanceEth = await meta.getBalanceInEth.call(accounts[0]);
-    let metaCoinEthBalance = outCoinBalanceEth.toNumber();
-    assert.equal(metaCoinEthBalance, 2 * metaCoinBalance);
-
+  it("..store name should be storeTest", async() => {
+    let storeName = await instance.getStoreName.call({from: owner})
+    assert.equal(storeName, "storeTest", "Store name is not storeTest")
   });
 
-  it("should send coin correctly", async () => {
+  it('..should add a new product with id 1, name avocado, price 10000 and stock 10', async() => {
+    await instance.addProduct(1,"avocado",10000, 10, { from: owner })
+    const new = await instance.NewProductAdded()
+    const log = await new Promise(function(resolve, reject) {
+        NewProductAdded.watch(function(error, log){ resolve(log);});
+    });
+    const productId = log.args.productId.toNumber()
+    const product = await storeContractInstance.getProduct(productId, {from: owner})
+    const productName = web3.toUtf8(product[0])
+    const productPrice = product[1]
+    const productStock = product[2]
 
-    // Get initial balances of first and second account.
-    let account_one = accounts[0];
-    let account_two = accounts[1];
+    assert.equal(productId, 1, "Incorrect Product id")
+    assert.equal(productName, 'Carrot', "Incorrect Product name")
+    assert.equal(productPrice, 15, "Incorrect Product price")
+    assert.equal(productStock, 10, "Incorrect Product stock")
+  })
 
-    let amount = 10;
+  it('should add 5 more items to Carrot stock, carrot stock should be 15', async() => {
+    await storeContractInstance.addProductStock(1, 5, { from: owner })
+    const ProductQuantityAdded = await storeContractInstance.ProductQuantityAdded()
 
+    const log = await new Promise(function(resolve, reject) {
+        ProductQuantityAdded.watch(function(error, log){ resolve(log);});
+    });
+    const productStock = log.args.remainingStock.toNumber()
 
-    let instance = await MetaCoin.deployed();
-    let meta = instance;
+    assert.equal(productStock, 15, 'Incorrect Product stock')
+  })
 
-    let balance = await meta.getBalance.call(account_one);
-    let account_one_starting_balance = balance.toNumber();
+  it('should remove all Carrot stock, carrot stock should be 0', async() => {
+    await storeContractInstance.removeProduct(1, 15, { from: owner })
+    const ProductRemoved = await storeContractInstance.ProductRemoved()
 
-    balance = await meta.getBalance.call(account_two);
-    let account_two_starting_balance = balance.toNumber();
-    await meta.sendCoin(account_two, amount, {from: account_one});
+    const log = await new Promise(function(resolve, reject) {
+        ProductRemoved.watch(function(error, log){ resolve(log);});
+    });
+    const productStock = log.args.remainingStock.toNumber()
 
-    balance = await meta.getBalance.call(account_one);
-    let account_one_ending_balance = balance.toNumber();
+    assert.equal(productStock, 0, 'Incorrect Product stock')
+  })
 
-    balance = await meta.getBalance.call(account_two);
-    let account_two_ending_balance = balance.toNumber();
+  it('should notify that a product stock is unavailable', async() => {
+    await storeContractInstance.checkProductAvailability(1, 10, { from: owner })
+    const ProductQuantityAvailable = storeContractInstance.ProductQuantityAvailable()
+    const log = await new Promise(function(resolve, reject) {
+        ProductQuantityAvailable.watch(function(error, log){ resolve(log);});
+    });
+    const isAvailable = log.args.available
+    console.log(isAvailable)
+    assert.equal(isAvailable, false, 'Product stock is available')
+  })
 
-    assert.equal(account_one_ending_balance, account_one_starting_balance - amount, "Amount wasn't correctly taken from the sender");
-    assert.equal(account_two_ending_balance, account_two_starting_balance + amount, "Amount wasn't correctly sent to the receiver");
-  });
-
-})
-
-it("should call a function that depends on a linked library", async () => {
-    let meta = await MetaCoin.deployed();
-    let outCoinBalance = await meta.getBalance.call(accounts[0]);
-    let metaCoinBalance = outCoinBalance.toNumber();
-    let outCoinBalanceEth = await meta.getBalanceInEth.call(accounts[0]);
-    let metaCoinEthBalance = outCoinBalanceEth.toNumber();
-    assert.equal(metaCoinEthBalance, 2 * metaCoinBalance);
-
-  });
-
-  it("should send coin correctly", async () => {
-
-    // Get initial balances of first and second account.
-    let account_one = accounts[0];
-    let account_two = accounts[1];
-
-    let amount = 10;
-
-
-    let instance = await MetaCoin.deployed();
-    let meta = instance;
-
-    let balance = await meta.getBalance.call(account_one);
-    let account_one_starting_balance = balance.toNumber();
-
-    balance = await meta.getBalance.call(account_two);
-    let account_two_starting_balance = balance.toNumber();
-    await meta.sendCoin(account_two, amount, {from: account_one});
-
-    balance = await meta.getBalance.call(account_one);
-    let account_one_ending_balance = balance.toNumber();
-
-    balance = await meta.getBalance.call(account_two);
-    let account_two_ending_balance = balance.toNumber();
-
-    assert.equal(account_one_ending_balance, account_one_starting_balance - amount, "Amount wasn't correctly taken from the sender");
-    assert.equal(account_two_ending_balance, account_two_starting_balance + amount, "Amount wasn't correctly sent to the receiver");
-  });
-
-})
-*/
+});

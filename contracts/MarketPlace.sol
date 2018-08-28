@@ -52,6 +52,7 @@ contract MarketPlace is Pausable {
     */
     function addAdmin(address newAdmin) public onlyAdmin whenNotPaused returns (bool success){
         require(admins[newAdmin] == false);
+        require(owners[newAdmin] == false);
         admins[newAdmin] = true;
         return true;
     }
@@ -62,6 +63,7 @@ contract MarketPlace is Pausable {
     */
     function addStoreOwner(address newOwner) public onlyAdmin whenNotPaused returns(bool success){
         require(owners[newOwner] == false);
+        require(admins[newOwner] == false);
         owners[newOwner] = true;
         return true;
     }      
@@ -104,5 +106,9 @@ contract MarketPlace is Pausable {
             return stores[msg.sender];
         }
     }  
+
+    function() public payable {
+        revert();
+    }
     
 }

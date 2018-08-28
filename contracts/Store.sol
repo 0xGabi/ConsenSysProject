@@ -2,10 +2,9 @@ pragma solidity ^0.4.21;
 
 import "./openzeppelin-solidity/Pausable.sol";
 import "./openzeppelin-solidity/SafeMath.sol";
-import "./openzeppelin-solidity/Escrow.sol";
 
 /** @title Store */
-contract Store is Pausable, Escrow {
+contract Store is Pausable {
     using SafeMath for uint256; 
 
     ///State
@@ -32,6 +31,7 @@ contract Store is Pausable, Escrow {
     event StockAvaiable(uint256 id, uint256 quantity);
     
     event Purchase(uint256 id, uint256 stock);
+    event Withdraw(uint256 payment);
 
     ///Modifier
 
@@ -89,7 +89,7 @@ contract Store is Pausable, Escrow {
     * @param id Identification of the prodcut
     * @param needed Stock needed
     */
-    function checkStock(uint256 id, uint256 needed) onlyStoreOwner public whenNotPaused returns(bool available) {
+    function checkStock(uint256 id, uint256 needed) public onlyStoreOwner whenNotPaused returns(bool available) {
         if (products[id].stock >= needed) {
             emit StockAvaiable(id, needed);
             return true;
@@ -116,13 +116,25 @@ contract Store is Pausable, Escrow {
     function payProducts(uint256 id, uint256 amount) public payable whenNotPaused returns (bool success) {
         uint256 totalPrice = products[id].price.mul(amount);
         if (msg.value >= totalPrice && products[id].stock >= amount) {
-            deposit(storeOwner);
             products[id].stock = products[id].stock.sub(amount);
+            storeBalance = storeBalance.add(msg.value);
             emit Purchase(id, products[id].stock);
             return true;
         }
         return false;
     }
+    
+    /**
+    * @dev Withdraw store balance
+    */
+    function withdraw() public onlyStoreOwner {
+        uint256 payment = storeBalance;
+        assert(address(this).balance >= storeBalance);
+        storeBalance = 0;
+        storeOwner.transfer(payment);
+        emit Withdraw(payment);
+    }
+
 
     /**
     * @notice Get product
