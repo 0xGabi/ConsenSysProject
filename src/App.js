@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import MarketPlaceContract from '../build/contracts/MarketPlace.json'
+import StoreContract from '../build/contracts/Store.json'
 import getWeb3 from './utils/getWeb3'
 
 import './css/oswald.css'
@@ -12,16 +13,22 @@ class App extends Component {
     super(props)
 
     this.state = {
-      marketPlaceContract: null,
+      MarketPlaceContract: null,
+      storeInstances: [],
+      storeNameList: [],
       web3: null,
-      coinbase: null
+      account: null,
+      inputText: ''
     };
 
-    this.handleChange = this.handleChange.bind(this);
-    //this.handleAddStore = this.handleCreateStore.bind(this);
-    this.handleAddStoreOwner = this.handleAddStoreOwner.bind(this);
+    this.handleChange = this.handleChange.bind(this)
+    this.handleCreateStore = this.handleCreateStore.bind(this)
+    this.handleAddStoreOwner = this.handleAddStoreOwner.bind(this)
+    this.setStoreContract = this.setStoreContract.bind(this)
+    this.getStoreName = this.getStoreName.bind(this)
+    this.instantiateStoreContract = this.instantiateStoreContract.bind(this)
   }
-
+  
   componentWillMount() {
     // Get network provider and web3 instance.
     // See utils/getWeb3 for more info.
@@ -32,49 +39,59 @@ class App extends Component {
         web3: results.web3
       })
 
-      // Instantiate contract once web3 provided.
-      this.instantiateContract()
+      // Instantiate contracts once web3 provided.
+      this.setContracts()
     })
     .catch(() => {
       console.log('Error finding web3.')
     })
   }
 
-  instantiateContract() {
-    /*
-     * SMART CONTRACT EXAMPLE
-     *
-     * Normally these functions would be called in the context of a
-     * state management library, but for convenience I've placed them here.
-     */
+  setContracts() {
+    this.instantiateStoreFactoryContract()
+    this.setStoreContract()
+  }
+
+  instantiateStoreFactoryContract() {
 
     const contract = require('truffle-contract')
-    const marketPlace = contract(MarketPlaceContract)
-    marketPlace.setProvider(this.state.web3.currentProvider)
+    const storeFactory = contract(MarketPlaceContract)
+    storeFactory.setProvider(this.state.web3.currentProvider)
 
-    // Declaring this for later so we can chain functions on StoreFactory.
-    var marketPlaceInstance
-
+    var storeFactoryCont
     // Get accounts.
-    this.state.web3.eth.getAccounts((error, _accounts) => {
-      marketPlace.deployed().then((instance) => {
-        marketPlaceInstance = instance
-        this.setState({marketPlaceContract: instance, accounts: _accounts});
+    this.state.web3.eth.getAccounts((error, accounts) => {
+      storeFactory.deployed().then((instance) => {
+        storeFactoryCont = instance
+        this.setState({storeFactoryInstance: instance, account: accounts[0]})
 
-        return marketPlaceInstance.getUserRole.call({from: _accounts[0]});
+        return storeFactoryCont.getUserRole.call({from: accounts[0]})
       }).then((result) => {
+        this.setState({ userRole: result} )
 
-        return this.setState({ userRole: result} );
+        return storeFactoryCont.getStores.call({from: accounts[0]})
       })
     })
+  }
+
+  setStoreContract() {
+    const contract = require('truffle-contract')
+    const store = contract(StoreContract)
+
+    store.setProvider(this.state.web3.currentProvider)
+    this.setState({ storeContract: store });
   }
 
   handleChange(e) {
     this.setState({ inputText: e.target.value });
   }
 
+  handleAddStoreOwner() {
+    this.state.storeFactoryInstance.addStoreOwner(this.state.inputText, { from: this.state.account })
+  }
+
   handleCreateStore() {
-    this.state.storeFactoryInstance.createStore(this.state.inputText, { from: this.state.account }).then((result) => {
+    this.state.storeFactoryInstance.addStore(this.state.inputText, { from: this.state.account }).then((result) => {
       for (var i= 0; i< result.logs.length; i++) {
         var log = result.logs[i]
         console.log(log)
@@ -94,45 +111,60 @@ class App extends Component {
     this.getStoreName( storeInstance )
   }
 
-  /*handleCreateStore(storeName) {
-    this.state.storeFactoryContract.createStore(storeName, { from: theCoinbase })
-  }*/
-
-  handleAddStoreOwner(address) {
-    this.state.marketPlaceContrac.addStoreOwner(address, { from: this.state.accounts[0] })
+  getStoreName(storeInstance) {
+    console.log(storeInstance)
+    storeInstance.getStoreName.call()
+    .then((result) => {
+      let storeName = result
+      let storeNameArray = this.state.storeNameList.concat( storeName )
+      this.setState({ storeNameList: storeNameArray })
+    })
   }
 
   render() {
-    const role = this.state.userRole;
-    let component;
+    const role = this.state.userRole
+    let component
 
-    if(role === 0) {
-        component =
-          <main className="container">
-            <div className="pure-g">
-              <div className="pure-u-1-1">
-                <h1>Welcome to the MarketPlace Admin!</h1>
-                <p>The user role is: {this.state.userRole}</p>
-              </div>
-            </div>
-          </main>
-    } else if(role === 1) {
-        component =
+    if(role === 'admin') {
+        component = 
+        //<AdminComponent
+        //  handleChange={this.handleChange}
+        //  handleAddStoreOwner={this.handleAddStoreOwner}
+        ///>
         <main className="container">
           <div className="pure-g">
             <div className="pure-u-1-1">
-              <h1>Welcome to the MarketPlace Store Owner!</h1>
-              <p>The user role is: {this.state.userRole}</p>
+              <h1>Welcome to the MarketPlace Admin</h1>
+              
+              <p>Address: {this.state.address}</p>
             </div>
           </div>
         </main>
-    } else if(role === 2) {
+    } else if(role === 'storeOwner') {
+        component =  
+        //handleChange={this.handleChange}
+        //handleCreateStore={this.handleCreateStore}
+        //storeInstances={this.state.storeInstances}
+        //storeNameList={this.state.storeNameList}
+        //getStoreName={this.getStoreName}  
+        <main className="container">
+          <div className="pure-g">
+            <div className="pure-u-1-1">
+              <h1>Welcome to the MarketPlace Owner</h1>
+              
+              <p>Address: {this.state.address}</p>
+            </div>
+          </div>
+        </main>
+         
+    } else if(role === 'shopper') {
         component =
         <main className="container">
           <div className="pure-g">
             <div className="pure-u-1-1">
               <h1>Welcome to the MarketPlace Shopper!</h1>
-              <p>The user role is: {this.state.userRole}</p>
+              
+              <p>Address: {this.state.address}</p>
             </div>
           </div>
         </main>
@@ -149,8 +181,8 @@ class App extends Component {
 
       </div>
   );
-
+  
+    }
   }
-}
-
-export default App
+  
+  export default App
