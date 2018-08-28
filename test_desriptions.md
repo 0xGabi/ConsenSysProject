@@ -27,6 +27,6 @@
 
 4. "..should remove all avocado stock, avocado stock should be 0" - Check if is possible to remove stock of an existing product. Test to see if removeStock function work as expected.
 
-5. '..should notify that a product stock is unavailable' - Check the stock availability of an existing product. Test to see if checkStock function work properly. 
+5. "..should notify that a product stock is unavailable" - Check the stock availability of an existing product. Test to see if checkStock function work properly. 
 
-6. '..should withdraw balance correctly/ - Check withdraw functionality is working correctly. Test owner balance before and after the transaction and check consistency. 
+6. '..should withdraw balance correctly" - Check withdraw functionality is working correctly. Test owner balance before and after the transaction and check consistency. 
